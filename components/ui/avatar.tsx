@@ -6,10 +6,10 @@ type AvatarProps = {
 };
 
 const colors = [
-  "bg-[var(--acid)] text-slate-950",
-  "bg-[var(--gold)] text-slate-950",
-  "bg-[var(--pink)] text-slate-950",
-  "bg-[var(--cyan)] text-slate-950",
+  "bg-[color-mix(in_oklch,var(--acid),transparent_16%)] text-[var(--bg-strong)]",
+  "bg-[color-mix(in_oklch,var(--gold),transparent_14%)] text-[var(--bg-strong)]",
+  "bg-[color-mix(in_oklch,var(--pink),transparent_16%)] text-[var(--bg-strong)]",
+  "bg-[color-mix(in_oklch,var(--cyan),transparent_14%)] text-[var(--bg-strong)]",
 ];
 
 function initials(name: string) {
@@ -25,7 +25,7 @@ export function Avatar({ name, className }: AvatarProps) {
   const tone = colors[name.length % colors.length];
 
   return (
-    <div className={cn("grid aspect-square place-items-center rounded-2xl text-base font-black", tone, className)}>
+    <div className={cn("grid aspect-square place-items-center rounded-lg text-sm font-semibold", tone, className)}>
       {initials(name)}
     </div>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef } from "react";
-import { RotateCcw } from "lucide-react";
+import { ArrowLeft, Copy, Download, Link2, MessageCircle, RotateCcw, Share2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -57,15 +57,49 @@ export default function ResultPage() {
   }
 
   return (
-    <main className="page-shell relative">
-      <div className="mx-auto grid w-full max-w-5xl gap-5">
-        <ResultCard ref={cardRef} result={result} />
-        <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-          <ShareButton target={cardRef} result={result} />
-          <Button variant="secondary" onClick={playAgain} className="w-full sm:w-auto">
-            <RotateCcw className="h-4 w-4" />
-            Play again
+    <main className="page-shell relative min-h-screen px-4 py-6 sm:px-6 lg:py-8">
+      <div className="mx-auto max-w-6xl rounded-[var(--radius)] border border-[var(--line)] bg-[color-mix(in_oklch,var(--surface),transparent_8%)] p-4 sm:p-5">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <Button variant="secondary" onClick={playAgain}>
+            <ArrowLeft className="h-4 w-4" />
+            New Game
           </Button>
+          <ShareButton target={cardRef} result={result} />
+        </div>
+
+        <ResultCard ref={cardRef} result={result} />
+
+        <div className="mt-4 rounded-[var(--radius)] border border-[var(--line)] bg-[var(--bg)] p-4">
+          <div className="grid gap-4 lg:grid-cols-[1fr_2fr] lg:items-center">
+            <div>
+              <h2 className="text-lg font-semibold">Share your result</h2>
+              <p className="mt-1 text-sm text-[var(--muted)]">Brag. Roast. Start arguments.</p>
+            </div>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+              {[
+                [Copy, "Copy Link"],
+                [MessageCircle, "Twitter"],
+                [Link2, "LinkedIn"],
+                [Share2, "Reddit"],
+                [Download, "Download"],
+              ].map(([Icon, label]) => (
+                <Button key={label as string} variant="secondary" onClick={() => document.querySelector<HTMLButtonElement>("[data-share-trigger]")?.click()}>
+                  <Icon className="h-4 w-4" />
+                  {label as string}
+                </Button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-4 rounded-[var(--radius)] border border-[var(--line)] bg-[var(--bg)] p-4">
+          <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-center">
+            <p className="text-center font-semibold sm:text-left">Think you can build a better team?</p>
+            <Button onClick={playAgain} className="w-full sm:w-72">
+              <RotateCcw className="h-4 w-4" />
+              Play Again
+            </Button>
+          </div>
         </div>
       </div>
     </main>

@@ -1,19 +1,35 @@
 "use client";
 
-import { Rocket, Shuffle, Trophy } from "lucide-react";
-import { motion } from "framer-motion";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
-import { useGameStore } from "@/store/game-store";
+import { Button } from "@/components/ui/button";
 import { trackGameEvent } from "@/lib/analytics";
 import { getRosterSize } from "@/lib/game";
+import { useGameStore } from "@/store/game-store";
+import { motion } from "framer-motion";
+import { BarChart3, Blocks, Rocket, Share2, Users } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const beats = [
-  { icon: Shuffle, label: "5 forced picks", copy: "One group at a time. No skipping. No spreadsheet cosplay." },
-  { icon: Rocket, label: "Hidden scoring", copy: "Coverage, synergy, fame, chaos, and ego collisions." },
-  { icon: Trophy, label: "Shareable result", copy: "Screenshot your cursed cap table and start arguments." },
+  {
+    icon: Users,
+    label: "1. Draft",
+    copy: "Every round shows a new category. Pick one person.",
+  },
+  {
+    icon: Blocks,
+    label: "2. Fill roles",
+    copy: "Complete 5 core roles to build your startup team.",
+  },
+  {
+    icon: BarChart3,
+    label: "3. See results",
+    copy: "Get your startup rating, strengths, and weaknesses.",
+  },
+  {
+    icon: Share2,
+    label: "4. Share",
+    copy: "Brag, roast, or start arguments online.",
+  },
 ];
 
 export default function HomePage() {
@@ -27,72 +43,88 @@ export default function HomePage() {
   }
 
   return (
-    <main className="page-shell relative">
-      <header className="top-bar flex items-center justify-between px-4 sm:px-8">
-        <div className="flex items-center gap-4">
-          <div className="grid h-10 w-10 place-items-center rounded-full border-2 border-[var(--acid)] bg-[var(--surface)] text-xs font-black leading-none text-[var(--acid)]">
-            82<br />0
-          </div>
-          <p className="text-xl font-black">Startup 82-0</p>
+    <main className="page-shell relative overflow-hidden">
+      <div className="pointer-events-none absolute inset-0 opacity-20">
+        <div className="absolute inset-0 bg-[linear-gradient(transparent_31px,color-mix(in_oklch,var(--line),transparent_78%)_32px),linear-gradient(90deg,transparent_31px,color-mix(in_oklch,var(--line),transparent_78%)_32px)] bg-[size:32px_32px] [mask-image:radial-gradient(circle_at_center,black,transparent_70%)]" />
+      </div>
+
+      <header className="relative z-10 mx-auto flex max-w-7xl items-center justify-between px-5 py-5 sm:px-8">
+        <div className="rounded-[var(--radius)] border border-[var(--line)] bg-[color-mix(in_oklch,var(--bg-strong),transparent_10%)] px-3 py-1.5 text-base font-semibold">
+          TILL <span className="text-[var(--pink)]">SERIES B</span>
         </div>
-        <Badge tone="muted">{getRosterSize()} people</Badge>
       </header>
-      <section className="mx-auto grid min-h-[calc(100vh-72px)] w-full max-w-6xl gap-8 p-4 sm:p-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
-        <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>
-          <Badge tone="gold">Startup 82-0</Badge>
-          <h1 className="display-font mt-5 max-w-4xl text-5xl leading-[0.94] sm:text-7xl">
-            Build the most cursed startup team in tech.
+
+      <section className="relative z-10 mx-auto grid min-h-[calc(100vh-82px)] w-full max-w-5xl place-items-center px-5 pb-8 text-center sm:px-8">
+        <motion.div
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45 }}
+          className="w-full"
+        >
+          <Badge tone="pink" className="mx-auto">
+            DRAFT. BUILD. DECIDE.
+          </Badge>
+          <h1 className="mx-auto mt-5 max-w-3xl text-4xl font-semibold leading-tight sm:text-6xl">
+            Build a startup team from tech’s most volatile roster.
           </h1>
-          <p className="mt-6 max-w-2xl text-xl leading-8 text-[var(--muted)]">
-            Five picks. No skipping. No spreadsheets. Just vibes, chaos, and valuation.
+          <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-[var(--muted)]">
+            You get 5 picks. Fill 5 roles. Build your dream team or nightmare.
           </p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <Button onClick={start} className="text-base">
+          <div className="mt-6 flex justify-center">
+            <Button onClick={start} className="min-w-56">
               <Rocket className="h-5 w-5" />
-              Start Company
-            </Button>
-            <Button variant="secondary" onClick={start}>
-              Randomize my cap table
+              Start a New Game
             </Button>
           </div>
+          <p className="mt-3 text-sm text-[var(--muted)]">
+            No signup. Just one draft.
+          </p>
+
+          <div className="mx-auto mt-6 flex max-w-md items-center justify-center gap-2">
+            {["SA", "AK", "PC", "MM", "EM"].map((label) => (
+              <div
+                key={label}
+                className="grid h-10 w-10 place-items-center rounded-[var(--radius)] border border-[var(--line)] bg-[var(--surface)] text-xs font-semibold text-[var(--pink)]"
+              >
+                {label}
+              </div>
+            ))}
+            <div className="grid h-10 w-10 place-items-center rounded-[var(--radius)] border border-[var(--line)] bg-[var(--surface)] text-xs font-semibold text-[var(--text)]">
+              +100
+            </div>
+          </div>
+          <p className="mt-3 text-sm text-[var(--muted)]">
+            {getRosterSize()} builders, operators, and chaos merchants
+          </p>
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.45, delay: 0.12 }}
-          className="grid gap-3"
+        <section
+          id="how"
+          className="mt-9 w-full rounded-[var(--radius)] border border-[var(--line)] bg-[color-mix(in_oklch,var(--surface),transparent_8%)]"
         >
-          <Card className="p-5">
-            <div className="flex items-center justify-between gap-4">
-              <Badge tone="acid">5 rounds</Badge>
-              <Badge tone="cyan">{getRosterSize()}+ people</Badge>
-            </div>
-            <div className="mt-6 grid gap-3">
-              {["CEO", "CTO", "Product", "Growth", "Ops"].map((role, index) => (
-                <div key={role} className="flex items-center justify-between rounded-[var(--radius)] border border-[var(--line)] bg-[var(--bg)] px-4 py-3">
-                  <span className="font-black text-[var(--muted)]">{role}</span>
-                  <span className="text-sm font-black text-[var(--gold)]">Slot {index + 1}</span>
-                </div>
-              ))}
-            </div>
-          </Card>
-          <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
+          <h2 className="px-4 pt-4 text-left text-lg font-semibold">
+            How it works
+          </h2>
+          <div className="grid gap-3 p-4 sm:grid-cols-4">
             {beats.map((beat) => (
-              <Card key={beat.label} className="p-4">
-                <div className="flex items-start gap-3">
-                  <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[var(--surface-lift)]">
-                    <beat.icon className="h-5 w-5 text-[var(--acid)]" />
-                  </div>
-                  <div>
-                    <h2 className="font-black">{beat.label}</h2>
-                    <p className="mt-1 text-sm leading-6 text-[var(--muted)]">{beat.copy}</p>
-                  </div>
+              <div
+                key={beat.label}
+                className="grid justify-items-center gap-2 p-2 text-center"
+              >
+                <div className="grid h-10 w-10 place-items-center rounded-lg bg-[color-mix(in_oklch,var(--pink),transparent_90%)] text-[var(--pink)]">
+                  <beat.icon className="h-5 w-5" />
                 </div>
-              </Card>
+                <h3 className="text-sm font-semibold">{beat.label}</h3>
+                <p className="text-sm leading-6 text-[var(--muted)]">
+                  {beat.copy}
+                </p>
+              </div>
             ))}
           </div>
-        </motion.div>
+          <div className="border-t border-[var(--line)] px-4 py-3 text-sm text-[var(--muted)]">
+            Made for fun. Not affiliated with any company or person.
+          </div>
+        </section>
       </section>
     </main>
   );

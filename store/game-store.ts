@@ -1,9 +1,14 @@
 "use client";
 
+import type { GameState, Person, Role } from "@/data/types";
+import {
+  createGame,
+  getRoundChoices,
+  placePerson,
+  spinGroup,
+} from "@/lib/game";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { createGame, getRoundChoices, pickPerson } from "@/lib/game";
-import type { GameState, Person } from "@/data/types";
 
 type LastAssignment = {
   assignedRole: string;
@@ -14,9 +19,16 @@ type LastAssignment = {
 type GameStore = {
   game?: GameState;
   choices: Person[];
+  selectedPersonId?: string;
   lastAssignment?: LastAssignment;
   startGame: () => GameState;
-  pick: (personId: string) => { completed: boolean; state: GameState; assignment: LastAssignment };
+  selectPerson: (personId: string) => void;
+  placeSelected: (role: Role) => {
+    completed: boolean;
+    state: GameState;
+    assignment: LastAssignment;
+  };
+  spin: () => GameState;
   reset: () => void;
 };
 
@@ -27,28 +39,43 @@ export const useGameStore = create<GameStore>()(
       startGame: () => {
         const game = createGame();
         const choices = getRoundChoices(game);
-        set({ game, choices, lastAssignment: undefined });
+        set({
+          game,
+          choices,
+          selectedPersonId: undefined,
+          lastAssignment: undefined,
+        });
         return game;
       },
-      pick: (personId: string) => {
+      selectPerson: (personId: string) => set({ selectedPersonId: personId }),
+      placeSelected: (role: Role) => {
         const currentGame = get().game;
+        const selectedPersonId = get().selectedPersonId;
+
+        if (!selectedPersonId) {
+          throw new Error("Select a person before placing them");
+        }
 
         if (!currentGame) {
           const game = createGame();
           const choices = getRoundChoices(game);
           set({ game, choices });
-          return get().pick(personId);
+          return get().placeSelected(role);
         }
 
-        const result = pickPerson(currentGame, personId);
+        const result = placePerson(currentGame, selectedPersonId, role);
         const choices = result.completed ? [] : getRoundChoices(result.state);
         const assignment = {
-          ...result.assignment,
           assignedRole: result.assignment.assignedRole,
-          pickedPersonId: personId,
+          pickedPersonId: selectedPersonId,
         };
 
-        set({ game: result.state, choices, lastAssignment: assignment });
+        set({
+          game: result.state,
+          choices,
+          selectedPersonId: undefined,
+          lastAssignment: assignment,
+        });
 
         return {
           completed: result.completed,
@@ -56,15 +83,34 @@ export const useGameStore = create<GameStore>()(
           assignment,
         };
       },
-      reset: () => set({ game: undefined, choices: [], lastAssignment: undefined }),
+      spin: () => {
+        const currentGame = get().game ?? createGame();
+        const game = spinGroup(currentGame);
+        const choices = getRoundChoices(game);
+        set({
+          game,
+          choices,
+          selectedPersonId: undefined,
+          lastAssignment: undefined,
+        });
+        return game;
+      },
+      reset: () =>
+        set({
+          game: undefined,
+          choices: [],
+          selectedPersonId: undefined,
+          lastAssignment: undefined,
+        }),
     }),
     {
-      name: "startup-82-0",
+      name: "till-series-b",
       partialize: (state) => ({
         game: state.game,
         choices: state.choices,
+        selectedPersonId: state.selectedPersonId,
         lastAssignment: state.lastAssignment,
       }),
-    }
-  )
+    },
+  ),
 );

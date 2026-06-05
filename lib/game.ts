@@ -1,7 +1,7 @@
 import { sourceGroups } from "@/data/groups";
 import { people, peopleById } from "@/data/people";
 import type { GamePick, GameState, Person, Role } from "@/data/types";
-import { createId, sample, shuffle } from "@/lib/random";
+import { createId, shuffle } from "@/lib/random";
 
 export const roles: Role[] = ["ceo", "cto", "product", "growth", "operator"];
 
@@ -36,14 +36,38 @@ export function roleFitScore(person: Person, role: Role) {
   return Math.round(scores[role] + roleBonus);
 }
 
-function getNextGroupId(usedGroupIds: string[]) {
-  const unused = sourceGroups.filter((group) => !usedGroupIds.includes(group.id));
-  const pool = unused.length > 0 ? unused : sourceGroups;
+function personCanFillRole(person: Person, role: Role) {
+  return person.primaryRole === role || person.secondaryRole === role;
+}
+
+export function getOpenRoles(team: Partial<Record<Role, string>>) {
+  return roles.filter((role) => !team[role]);
+}
+
+export function getCompatibleRoles(person: Person, team: Partial<Record<Role, string>>) {
+  return getOpenRoles(team).filter((role) => personCanFillRole(person, role));
+}
+
+export function groupCanFillOpenRole(groupId: string, team: Partial<Record<Role, string>>, pickedIds: string[] = []) {
+  const picked = new Set(pickedIds);
+  const group = sourceGroups.find((item) => item.id === groupId);
+  if (!group) return false;
+
+  return group.peopleIds.some((personId) => {
+    const person = peopleById.get(personId);
+    return person && !picked.has(person.id) && getCompatibleRoles(person, team).length > 0;
+  });
+}
+
+function getNextGroupId(usedGroupIds: string[], team: Partial<Record<Role, string>>, pickedIds: string[] = []) {
+  const compatibleGroups = sourceGroups.filter((group) => groupCanFillOpenRole(group.id, team, pickedIds));
+  const unused = compatibleGroups.filter((group) => !usedGroupIds.includes(group.id));
+  const pool = unused.length > 0 ? unused : compatibleGroups.length > 0 ? compatibleGroups : sourceGroups;
   return shuffle(pool)[0]?.id ?? "tech-twitter";
 }
 
 export function createGame(maxRounds = 5): GameState {
-  const currentGroupId = getNextGroupId([]);
+  const currentGroupId = getNextGroupId([], {});
 
   return {
     id: createId(),
@@ -64,85 +88,67 @@ export function getRoundChoices(state: GameState) {
   const group = getCurrentGroup(state);
   const groupPeople = group.peopleIds.map((id) => peopleById.get(id)).filter(Boolean) as Person[];
   const roundPickIds = new Set(state.picks.map((pick) => pick.selectedPersonId));
-  const available = groupPeople.filter((person) => !roundPickIds.has(person.id));
-  const pool = available.length >= 3 ? available : groupPeople;
-  return sample(pool, 3, 5);
+  const available = groupPeople.filter((person) => !roundPickIds.has(person.id) && getCompatibleRoles(person, state.team).length > 0);
+  return shuffle(available);
 }
 
-function targetRolesForPick(person: Person) {
-  const preferred = [person.primaryRole, person.secondaryRole].filter(Boolean) as Role[];
-  const fallback = roles
-    .filter((role) => !preferred.includes(role))
-    .sort((a, b) => roleFitScore(person, b) - roleFitScore(person, a));
-
-  return [...preferred, ...fallback];
-}
-
-export function assignPersonToTeam(team: Partial<Record<Role, string>>, person: Person) {
+export function assignPersonToTeam(team: Partial<Record<Role, string>>, person: Person, role: Role) {
   const nextTeam = { ...team };
-  const targetRoles = targetRolesForPick(person);
 
-  for (const role of targetRoles) {
-    if (!nextTeam[role]) {
-      nextTeam[role] = person.id;
-      return { team: nextTeam, assignedRole: role, replacedPersonId: undefined };
-    }
+  if (nextTeam[role]) {
+    throw new Error(`${role} is already filled`);
   }
 
-  const replacementRole = targetRoles
-    .map((role) => {
-      const incumbent = nextTeam[role] ? peopleById.get(nextTeam[role] as string) : undefined;
-      const incumbentScore = incumbent ? roleFitScore(incumbent, role) : 0;
-      const challengerScore = roleFitScore(person, role);
+  if (!personCanFillRole(person, role)) {
+    throw new Error(`${person.name} cannot fill ${role}`);
+  }
 
-      return {
-        role,
-        incumbentId: incumbent?.id,
-        incumbentScore,
-        challengerScore,
-        delta: challengerScore - incumbentScore,
-      };
-    })
-    .sort((a, b) => b.delta - a.delta || a.incumbentScore - b.incumbentScore)[0];
-
-  nextTeam[replacementRole.role] = person.id;
-
-  return {
-    team: nextTeam,
-    assignedRole: replacementRole.role,
-    replacedPersonId: replacementRole.incumbentId,
-  };
+  nextTeam[role] = person.id;
+  return { team: nextTeam, assignedRole: role };
 }
 
-export function pickPerson(state: GameState, selectedPersonId: string) {
+export function placePerson(state: GameState, selectedPersonId: string, role: Role) {
   const person = peopleById.get(selectedPersonId);
 
   if (!person) {
     throw new Error(`Unknown person: ${selectedPersonId}`);
   }
 
-  const assignment = assignPersonToTeam(state.team, person);
+  const assignment = assignPersonToTeam(state.team, person, role);
   const pick: GamePick = {
     round: state.round,
     groupId: state.currentGroupId,
     selectedPersonId,
+    assignedRole: role,
   };
 
   const completed = state.round >= state.maxRounds;
-  const nextUsedGroupIds = completed ? state.usedGroupIds : state.usedGroupIds;
-  const nextGroupId = completed ? state.currentGroupId : getNextGroupId(nextUsedGroupIds);
+  const nextTeam = assignment.team;
+  const nextPickedIds = [...state.picks, pick].map((item) => item.selectedPersonId);
+  const nextGroupId = completed ? state.currentGroupId : getNextGroupId(state.usedGroupIds, nextTeam, nextPickedIds);
 
   return {
     state: {
       ...state,
       round: completed ? state.round : state.round + 1,
       currentGroupId: nextGroupId,
-      team: assignment.team,
+      team: nextTeam,
       picks: [...state.picks, pick],
       usedGroupIds: completed ? state.usedGroupIds : [...state.usedGroupIds, nextGroupId],
     },
     assignment,
     completed,
+  };
+}
+
+export function spinGroup(state: GameState) {
+  const pickedIds = state.picks.map((pick) => pick.selectedPersonId);
+  const nextGroupId = getNextGroupId([...state.usedGroupIds, state.currentGroupId], state.team, pickedIds);
+
+  return {
+    ...state,
+    currentGroupId: nextGroupId,
+    usedGroupIds: [...state.usedGroupIds, nextGroupId],
   };
 }
 

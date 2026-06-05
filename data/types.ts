@@ -9,6 +9,26 @@ export type SourceGroupType =
   | "crypto"
   | "ai";
 
+export type SourceGroupCategory =
+  | "AI"
+  | "Commerce"
+  | "Consumer"
+  | "Crypto"
+  | "Design"
+  | "Entertainment"
+  | "Enterprise"
+  | "Fintech"
+  | "Founder"
+  | "Growth"
+  | "Hard Tech"
+  | "Indie"
+  | "Infra"
+  | "Investor"
+  | "Marketplace"
+  | "Operator"
+  | "Product"
+  | "Social";
+
 export type PersonStats = {
   vision: number;
   engineering: number;
@@ -37,6 +57,7 @@ export type SourceGroup = {
   id: string;
   name: string;
   type: SourceGroupType;
+  category: SourceGroupCategory;
   description?: string;
   peopleIds: string[];
 };
@@ -45,6 +66,7 @@ export type GamePick = {
   round: number;
   groupId: string;
   selectedPersonId: string;
+  assignedRole: Role;
 };
 
 export type GameState = {

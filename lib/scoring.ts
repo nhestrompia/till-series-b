@@ -114,14 +114,27 @@ export function outcomeForScore(score: number) {
   return { tier: "trillion" as const, outcome: "Trillion-dollar company" };
 }
 
-function valuationForScore(score: number) {
+function hashString(value: string) {
+  let hash = 0;
+  for (let index = 0; index < value.length; index += 1) {
+    hash = (hash * 31 + value.charCodeAt(index)) >>> 0;
+  }
+  return hash;
+}
+
+function variance(seed: string, min: number, max: number) {
+  const ratio = (hashString(seed) % 1000) / 1000;
+  return min + (max - min) * ratio;
+}
+
+function valuationForScore(score: number, seed: string) {
   if (score <= 250) return "$0";
-  if (score <= 400) return `$${Math.max(2, Math.round(score / 18))}M`;
-  if (score <= 550) return `$${Math.round(score / 8)}M`;
-  if (score <= 700) return `$${(score / 130).toFixed(1)}B`;
-  if (score <= 850) return `$${(score / 55).toFixed(1)}B`;
-  if (score <= 950) return `$${Math.round(score / 12)}B public company`;
-  return `$${(score / 980).toFixed(2)}T`;
+  if (score <= 400) return `$${Math.round(variance(seed, 1.8, 18.5))}M`;
+  if (score <= 550) return `$${Math.round(variance(seed, 28, 180))}M`;
+  if (score <= 700) return `$${variance(seed, 1.1, 4.8).toFixed(1)}B`;
+  if (score <= 850) return `$${variance(seed, 8.2, 38).toFixed(1)}B`;
+  if (score <= 950) return `$${Math.round(variance(seed, 42, 185))}B public company`;
+  return `$${variance(seed, 1.08, 3.7).toFixed(2)}T`;
 }
 
 function bestPickFromPicks(picks: GamePick[]) {
@@ -209,13 +222,21 @@ export function scoreGame(state: GameState): StartupResult {
   const fameMultiplier = 1 + Math.max(-0.08, Math.min(0.14, (avgFame - 70) / 240));
   const categoryBonus = new Set(team.flatMap((person) => person.sourceGroupIds)).size * 4;
   const penalty = calculatePenalty(team);
-  const finalScore = Math.max(0, Math.round((baseRoleScore + coverageBonus + balanceBonus + synergyBonus + categoryBonus - penalty) * fameMultiplier));
+  const rawScore =
+    baseRoleScore * 1 +
+    coverageBonus * 0.6 +
+    balanceBonus * 0.7 +
+    synergyBonus * 0.78 +
+    categoryBonus * 0.5 -
+    penalty * 1.15;
+  const finalScore = Math.max(0, Math.round(rawScore * fameMultiplier));
   const outcome = outcomeForScore(finalScore);
   const bestPick = bestPickFromPicks(state.picks);
+  const valuationSeed = state.picks.map((pick) => `${pick.selectedPersonId}:${pick.assignedRole}`).join("|");
 
   return {
     ...outcome,
-    valuation: valuationForScore(finalScore),
+    valuation: valuationForScore(finalScore, valuationSeed),
     score: finalScore,
     breakdown: {
       roleScore: baseRoleScore,

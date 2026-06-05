@@ -14,6 +14,7 @@ function stateWithTeam(team: Record<Role, string>): GameState {
       round: index + 1,
       groupId: "tech-twitter",
       selectedPersonId,
+      assignedRole: Object.keys(team)[index] as Role,
     })),
   };
 }
