@@ -1,0 +1,91 @@
+@import "tailwindcss";
+
+:root {
+  --bg: oklch(0.145 0.022 252);
+  --bg-strong: oklch(0.105 0.024 252);
+  --surface: oklch(0.19 0.028 252);
+  --surface-lift: oklch(0.235 0.03 252);
+  --line: oklch(0.34 0.035 252);
+  --text: oklch(0.94 0.014 252);
+  --muted: oklch(0.67 0.025 252);
+  --acid: oklch(0.73 0.19 42);
+  --gold: oklch(0.79 0.17 78);
+  --pink: oklch(0.7 0.16 332);
+  --cyan: oklch(0.68 0.13 225);
+  --danger: oklch(0.68 0.18 25);
+  --radius: 12px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-height: 100%;
+  background: var(--bg-strong);
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  background: var(--bg-strong);
+  color: var(--text);
+  font-family: "Trebuchet MS", "Avenir Next", Verdana, sans-serif;
+  letter-spacing: 0;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+  background: color-mix(in oklch, var(--acid), transparent 35%);
+  color: var(--bg-strong);
+}
+
+.display-font {
+  font-family: "Arial Black", "Trebuchet MS", sans-serif;
+  letter-spacing: 0;
+}
+
+.page-shell {
+  min-height: 100vh;
+  padding: 0;
+}
+
+.noise {
+  display: none;
+}
+
+.result-card {
+  background: var(--surface);
+}
+
+.top-bar {
+  min-height: 72px;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg-strong);
+}
+
+.game-grid {
+  display: grid;
+  grid-template-columns: minmax(320px, 0.82fr) minmax(360px, 1.18fr);
+  gap: clamp(1rem, 2vw, 2rem);
+}
+
+.startup-board {
+  min-height: 560px;
+  background:
+    repeating-linear-gradient(90deg, oklch(0.18 0.035 252), oklch(0.18 0.035 252) 16px, oklch(0.16 0.03 252) 16px, oklch(0.16 0.03 252) 32px);
+}
+
+@media (max-width: 900px) {
+  .game-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .startup-board {
+    min-height: 420px;
+  }
+}
