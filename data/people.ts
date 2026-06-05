@@ -16,17 +16,66 @@ type PersonInput = {
   name: string;
   handle?: string;
   knownFor: string;
-  primaryRole: Role;
-  secondaryRole?: Role;
+  primaryRole: Role | "operator";
+  secondaryRole?: Role | "operator";
   stats: Partial<PersonStats>;
   tags: string[];
   sourceGroupIds: string[];
 };
 
+const playableRoles: Role[] = ["ceo", "cto", "product", "growth"];
+
+function roleFit(stats: PersonStats, role: Role) {
+  const scores: Record<Role, number> = {
+    ceo:
+      stats.vision * 0.35 +
+      stats.fundraising * 0.3 +
+      stats.operations * 0.2 +
+      stats.fame * 0.15,
+    cto:
+      stats.engineering * 0.5 +
+      stats.product * 0.25 +
+      stats.vision * 0.25,
+    product:
+      stats.product * 0.45 +
+      stats.vision * 0.25 +
+      stats.growth * 0.2 +
+      stats.operations * 0.1,
+    growth:
+      stats.growth * 0.45 +
+      stats.fame * 0.2 +
+      stats.fundraising * 0.2 +
+      stats.operations * 0.15,
+  };
+
+  return scores[role];
+}
+
+function strongestRole(stats: PersonStats, excludedRole?: Role) {
+  return [...playableRoles]
+    .filter((role) => role !== excludedRole)
+    .sort((a, b) => roleFit(stats, b) - roleFit(stats, a))[0];
+}
+
 function p(input: PersonInput): Person {
+  const stats = { ...baseStats, ...input.stats };
+  const declaredPrimary =
+    input.primaryRole === "operator" ? undefined : input.primaryRole;
+  const declaredSecondary =
+    input.secondaryRole === "operator" ? undefined : input.secondaryRole;
+  const primaryRole =
+    declaredPrimary ?? declaredSecondary ?? strongestRole(stats);
+  const secondaryRole = declaredPrimary
+    ? input.secondaryRole === "operator"
+      ? strongestRole(stats, primaryRole)
+      : declaredSecondary
+    : undefined;
+
   return {
     ...input,
-    stats: { ...baseStats, ...input.stats },
+    primaryRole,
+    secondaryRole,
+    stats,
   };
 }
 

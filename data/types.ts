@@ -1,4 +1,4 @@
-export type Role = "ceo" | "cto" | "product" | "growth" | "operator";
+export type Role = "ceo" | "cto" | "product" | "growth";
 
 export type SourceGroupType =
   | "company"
@@ -71,6 +71,7 @@ export type GamePick = {
 
 export type GameState = {
   id: string;
+  companyName: string;
   round: number;
   maxRounds: number;
   currentGroupId: string;

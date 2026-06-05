@@ -1,129 +1,280 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { trackGameEvent } from "@/lib/analytics";
 import { getRosterSize } from "@/lib/game";
 import { useGameStore } from "@/store/game-store";
 import { motion } from "framer-motion";
-import { BarChart3, Blocks, Rocket, Share2, Users } from "lucide-react";
+import { ArrowRight, Boxes, Flag, Rocket, Sparkles, Users } from "lucide-react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { type FormEvent, useEffect, useRef, useState } from "react";
 
-const beats = [
+const previewPeople = [
+  { initials: "SA", name: "Sam Altman", tone: "violet" },
+  { initials: "PG", name: "Paul Graham", tone: "green" },
+  { initials: "IS", name: "Ilya Sutskever", tone: "gold" },
+  { initials: "DF", name: "Dylan Field", tone: "blue" },
+];
+
+const roles = ["CEO", "CTO", "Product", "Growth"];
+
+const categories = [
+  { label: "OpenAI", mark: "◎", tone: "violet" },
+  { label: "Stripe", mark: "///", tone: "green" },
+  { label: "Tech Twitter", mark: "✦", tone: "blue" },
+  { label: "Crypto Twitter", mark: "◆", tone: "gold" },
+  { label: "Y Combinator", mark: "Y", tone: "coral" },
+];
+
+const steps = [
+  {
+    icon: Sparkles,
+    number: "01",
+    title: "Draft",
+    copy: "Four rounds. Four categories. One pick from each.",
+  },
   {
     icon: Users,
-    label: "1. Draft",
-    copy: "Every round shows a new category. Pick one person.",
+    number: "02",
+    title: "Build",
+    copy: "Fill CEO, CTO, product, and growth with your dream team.",
   },
   {
-    icon: Blocks,
-    label: "2. Fill roles",
-    copy: "Complete 5 core roles to build your startup team.",
-  },
-  {
-    icon: BarChart3,
-    label: "3. See results",
-    copy: "Get your startup rating, strengths, and weaknesses.",
-  },
-  {
-    icon: Share2,
-    label: "4. Share",
-    copy: "Brag, roast, or start arguments online.",
+    icon: Flag,
+    number: "03",
+    title: "Survive",
+    copy: "See your rating, valuation, strengths, and fatal flaws.",
   },
 ];
 
 export default function HomePage() {
   const router = useRouter();
   const startGame = useGameStore((state) => state.startGame);
+  const lastCompanyName = useGameStore((state) => state.lastCompanyName);
+  const [companyName, setCompanyName] = useState("");
+  const hasEditedCompanyName = useRef(false);
 
-  function start() {
-    startGame();
+  useEffect(() => {
+    if (lastCompanyName && !hasEditedCompanyName.current) {
+      setCompanyName(lastCompanyName);
+    }
+  }, [lastCompanyName]);
+
+  function start(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const name = companyName.trim();
+    if (!name) return;
+
+    startGame(name);
     trackGameEvent("game_started", { roster_size: getRosterSize() });
     router.push("/play");
   }
 
-  return (
-    <main className="page-shell relative overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 opacity-20">
-        <div className="absolute inset-0 bg-[linear-gradient(transparent_31px,color-mix(in_oklch,var(--line),transparent_78%)_32px),linear-gradient(90deg,transparent_31px,color-mix(in_oklch,var(--line),transparent_78%)_32px)] bg-[size:32px_32px] [mask-image:radial-gradient(circle_at_center,black,transparent_70%)]" />
-      </div>
+  function focusCompanyName() {
+    const input = document.getElementById("company-name");
+    input?.scrollIntoView({ behavior: "smooth", block: "center" });
+    window.setTimeout(() => input?.focus(), 350);
+  }
 
-      <header className="relative z-10 mx-auto flex max-w-7xl items-center justify-between px-5 py-5 sm:px-8">
-        <img src="/till.png" alt="Till Series B logo" className="h-24 w-auto" />
+  return (
+    <main className="home-page">
+      <div className="home-ambient" aria-hidden="true" />
+
+      <header className="home-header">
+        <a className="home-brand" href="#" aria-label="Till Series B home">
+          <Image
+            src="/till.png"
+            alt=""
+            width={1254}
+            height={1254}
+            priority
+            className="home-brand-image"
+          />
+          <span>
+            <strong>Till Series B</strong>
+            <small>The startup draft</small>
+          </span>
+        </a>
+
+        <div className="home-manifesto">
+          <span>No skips.</span>
+          <span>Just picks.</span>
+          <span>Live with it.</span>
+        </div>
       </header>
 
-      <section className="relative z-10 mx-auto grid min-h-[calc(100vh-82px)] w-full max-w-5xl place-items-center px-5 pb-8 text-center sm:px-8">
+      <section className="home-hero">
         <motion.div
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.45 }}
-          className="w-full"
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="home-hero-copy"
         >
-          <Badge tone="pink" className="mx-auto">
-            DRAFT. BUILD. DECIDE.
-          </Badge>
-          <h1 className="mx-auto mt-5 max-w-3xl text-4xl font-semibold leading-tight sm:text-6xl">
-            Build a startup team from tech’s most volatile roster.
-          </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-[var(--muted)]">
-            You get 5 picks. Fill 5 roles. Build your dream team or nightmare.
-          </p>
-          <div className="mt-6 flex justify-center">
-            <Button onClick={start} className="min-w-56">
-              <Rocket className="h-5 w-5" />
-              Start a New Game
-            </Button>
+          <div className="home-eyebrow">
+            <span>4 rounds</span>
+            <span>4 roles</span>
+            <span>zero take-backs</span>
           </div>
-          <p className="mt-3 text-sm text-[var(--muted)]">
-            No signup. Just one draft.
+          <h1>
+            Can you make it
+            <br />
+            till <em>Series B?</em>
+          </h1>
+          <p>
+            Draft your startup team from tech&apos;s most iconic builders,
+            operators, and chaos merchants.
           </p>
 
-          <div className="mx-auto mt-6 flex max-w-md items-center justify-center gap-2">
-            {["SA", "AK", "PC", "MM", "EM"].map((label) => (
-              <div
-                key={label}
-                className="grid h-10 w-10 place-items-center rounded-[var(--radius)] border border-[var(--line)] bg-[var(--surface)] text-xs font-semibold text-[var(--pink)]"
+          <form className="home-start-form" onSubmit={start}>
+            <label className="home-company-label" htmlFor="company-name">
+              Name your company
+            </label>
+            <div className="home-company-row">
+              <input
+                id="company-name"
+                name="companyName"
+                type="text"
+                value={companyName}
+                onChange={(event) => {
+                  hasEditedCompanyName.current = true;
+                  setCompanyName(event.target.value);
+                }}
+                maxLength={40}
+                autoComplete="organization"
+                placeholder="e.g. Orbit Labs"
+                required
+                aria-describedby="company-name-hint"
+                className="home-company-input"
+              />
+              <button
+                type="submit"
+                disabled={!companyName.trim()}
+                className="home-cta"
               >
-                {label}
-              </div>
-            ))}
-            <div className="grid h-10 w-10 place-items-center rounded-[var(--radius)] border border-[var(--line)] bg-[var(--surface)] text-xs font-semibold text-[var(--text)]">
-              +100
+                <Rocket aria-hidden="true" />
+                Start game
+                <ArrowRight aria-hidden="true" className="home-cta-arrow" />
+              </button>
             </div>
-          </div>
-          <p className="mt-3 text-sm text-[var(--muted)]">
-            {getRosterSize()} builders, operators, and chaos merchants
-          </p>
+            <span id="company-name-hint" className="home-company-hint">
+              This name appears on your final card and shared image.
+            </span>
+          </form>
+          <span className="home-no-signup">No signup. Just play.</span>
         </motion.div>
 
-        <section
-          id="how"
-          className="mt-9 w-full rounded-[var(--radius)] border border-[var(--line)] bg-[color-mix(in_oklch,var(--surface),transparent_8%)]"
+        <motion.div
+          initial={{ opacity: 0, rotate: 4, scale: 0.96 }}
+          animate={{ opacity: 1, rotate: 1.5, scale: 1 }}
+          transition={{ delay: 0.12, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          className="home-hero-art"
+          aria-hidden="true"
         >
-          <h2 className="px-4 pt-4 text-left text-lg font-semibold">
-            How it works
-          </h2>
-          <div className="grid gap-3 p-4 sm:grid-cols-4">
-            {beats.map((beat) => (
-              <div
-                key={beat.label}
-                className="grid justify-items-center gap-2 p-2 text-center"
-              >
-                <div className="grid h-10 w-10 place-items-center rounded-lg bg-[color-mix(in_oklch,var(--pink),transparent_90%)] text-[var(--pink)]">
-                  <beat.icon className="h-5 w-5" />
-                </div>
-                <h3 className="text-sm font-semibold">{beat.label}</h3>
-                <p className="text-sm leading-6 text-[var(--muted)]">
-                  {beat.copy}
-                </p>
+          <Image src="/till.png" alt="" width={1254} height={1254} priority />
+          <span className="home-art-note">Pick wisely.</span>
+        </motion.div>
+      </section>
+
+      <motion.section
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.18, duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+        className="draft-preview"
+        aria-label="Game preview"
+      >
+        <div className="draft-preview-header">
+          <div>
+            <span className="draft-round">Round 1 of 4</span>
+            <h2>
+              Pick your <em>CEO</em>
+            </h2>
+          </div>
+          <span className="draft-rule">
+            <Boxes aria-hidden="true" />
+            Four candidates. One pick.
+          </span>
+        </div>
+
+        <div className="draft-cards">
+          {previewPeople.map((person, index) => (
+            <article
+              key={person.name}
+              className={`draft-card draft-card-${person.tone}`}
+            >
+              <span className="draft-card-number">0{index + 1}</span>
+              <div className="draft-avatar">
+                <span>{person.initials}</span>
+              </div>
+              <h3>{person.name}</h3>
+              <button type="button" onClick={focusCompanyName}>
+                Pick
+              </button>
+            </article>
+          ))}
+        </div>
+
+        <div className="team-strip">
+          <div className="team-strip-label">
+            <span>Your startup</span>
+            <small>Make it to Series B</small>
+          </div>
+          <div className="team-slots">
+            {roles.map((role, index) => (
+              <div className="team-slot" key={role}>
+                <span>?</span>
+                <small>Pick {index + 1}</small>
+                <strong>{role}</strong>
               </div>
             ))}
           </div>
-          <div className="border-t border-[var(--line)] px-4 py-3 text-sm text-[var(--muted)]">
-            Made for fun. Not affiliated with any company or person.
-          </div>
-        </section>
+          <Flag className="team-flag" aria-hidden="true" />
+        </div>
+      </motion.section>
+
+      <section className="home-categories" aria-labelledby="categories-title">
+        <div className="home-section-title">
+          <span>Popular pools</span>
+          <h2 id="categories-title">Who could show up?</h2>
+        </div>
+        <div className="category-list">
+          {categories.map((category) => (
+            <span
+              key={category.label}
+              className={`category-chip category-chip-${category.tone}`}
+            >
+              <i>{category.mark}</i>
+              {category.label}
+            </span>
+          ))}
+          <span className="category-chip category-chip-more">+ 27 more</span>
+        </div>
       </section>
+
+      <section className="home-how" aria-labelledby="how-title">
+        <div className="home-section-title">
+          <span>Simple rules. Bad decisions.</span>
+          <h2 id="how-title">How it works</h2>
+        </div>
+
+        <div className="how-grid">
+          {steps.map((step, index) => (
+            <article className="how-step" key={step.title}>
+              <span className="how-number">{step.number}</span>
+              <step.icon aria-hidden="true" />
+              <h3>{step.title}</h3>
+              <p>{step.copy}</p>
+              {index < steps.length - 1 ? (
+                <ArrowRight className="how-arrow" aria-hidden="true" />
+              ) : null}
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <footer className="home-footer">
+        <span>{getRosterSize()} people in the draft pool</span>
+        <span>Made for fun. Not affiliated with anyone featured.</span>
+      </footer>
     </main>
   );
 }

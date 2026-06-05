@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 type PersonCardProps = {
   person: Person;
   selected?: boolean;
+  disabled?: boolean;
   onSelect: (id: string) => void;
 };
 
@@ -28,19 +29,30 @@ const tagLabels: Record<string, string> = {
   indie: "Bootstrapped Menace",
 };
 
-export function PersonCard({ person, selected = false, onSelect }: PersonCardProps) {
+export function PersonCard({
+  person,
+  selected = false,
+  disabled = false,
+  onSelect,
+}: PersonCardProps) {
   const labels = person.tags.slice(0, 2).map((tag) => tagLabels[tag] ?? tag.replaceAll("-", " "));
 
   return (
     <motion.button
       type="button"
-      whileHover={{ y: -1 }}
-      whileTap={{ scale: 0.98 }}
+      whileHover={disabled ? undefined : { y: -1 }}
+      whileTap={disabled ? undefined : { scale: 0.98 }}
+      disabled={disabled}
       onClick={() => onSelect(person.id)}
       data-person-card={person.id}
+      data-person-available={disabled ? "false" : "true"}
       className={cn(
         "group w-full rounded-[var(--radius)] border bg-[var(--surface)] p-3 text-left transition duration-150 hover:border-[color-mix(in_oklch,var(--acid),transparent_35%)] hover:bg-[var(--surface-lift)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--acid)]",
-        selected ? "border-[var(--acid)] bg-[color-mix(in_oklch,var(--surface),var(--acid)_7%)]" : "border-[var(--line)]"
+        selected
+          ? "border-[var(--acid)] bg-[color-mix(in_oklch,var(--surface),var(--acid)_7%)]"
+          : "border-[var(--line)]",
+        disabled &&
+          "cursor-not-allowed opacity-45 hover:border-[var(--line)] hover:bg-[var(--surface)]",
       )}
     >
       <div className="flex items-center gap-3">
@@ -51,7 +63,10 @@ export function PersonCard({ person, selected = false, onSelect }: PersonCardPro
               <h3 className="text-base font-semibold leading-snug text-[var(--text)]">{person.name}</h3>
               <p className="mt-0.5 truncate text-xs text-[var(--muted)]">{person.handle ?? person.knownFor}</p>
             </div>
-            <Badge tone="gold">{roleShortLabels[person.primaryRole]}</Badge>
+            <div className="flex shrink-0 flex-col items-end gap-1">
+              <Badge tone="gold">{roleShortLabels[person.primaryRole]}</Badge>
+              {disabled ? <Badge tone="muted">No open role</Badge> : null}
+            </div>
           </div>
         </div>
       </div>

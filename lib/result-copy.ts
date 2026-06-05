@@ -1,25 +1,29 @@
 import type { StartupResult } from "@/lib/scoring";
 
-export function resultHeadline(result: StartupResult) {
-  if (result.tier === "shutdown") return "You built a startup-shaped calendar invite.";
-  if (result.tier === "seed") return `You built a ${result.valuation} seed-stage content machine.`;
-  if (result.tier === "series-a") return `You built a ${result.valuation} Series A company.`;
-  if (result.tier === "unicorn") return `You built a ${result.valuation} unicorn.`;
-  if (result.tier === "decacorn") return `You built a ${result.valuation} decacorn.`;
-  if (result.tier === "ipo") return `You built a ${result.valuation}.`;
-  return `You built a ${result.valuation} monster.`;
+export const SHARE_URL = "https://till-series-b.vercel.app";
+
+export function resultHeadline(
+  result: StartupResult,
+  companyName = "Your startup",
+) {
+  if (result.tier === "shutdown")
+    return `${companyName} became a startup-shaped calendar invite.`;
+  if (result.tier === "seed")
+    return `${companyName} is a ${result.valuation} seed-stage content machine.`;
+  if (result.tier === "series-a")
+    return `${companyName} is a ${result.valuation} Series A company.`;
+  if (result.tier === "unicorn")
+    return `${companyName} is a ${result.valuation} unicorn.`;
+  if (result.tier === "decacorn")
+    return `${companyName} is a ${result.valuation} decacorn.`;
+  if (result.tier === "ipo")
+    return `${companyName} reached ${result.valuation}.`;
+  return `${companyName} became a ${result.valuation} monster.`;
 }
 
-export function shareText(result: StartupResult) {
-  const team = result.team
-    .filter((slot) => slot.person)
-    .map((slot) => `${slot.role.toUpperCase()}: ${slot.person!.name}`)
-    .join("\n");
+export function shareText(result: StartupResult, companyName: string) {
+  return `I built ${companyName}, a ${result.valuation} startup with a TSB score of ${result.score}.
 
-  return `${resultHeadline(result)}
-Outcome: ${result.outcome}
-Best pick: ${result.bestPick.name}
-Weakness: ${result.weakness}
-
-${team}`;
+Can you pass this?
+${SHARE_URL}`;
 }

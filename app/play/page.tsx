@@ -2,15 +2,17 @@
 
 import { PersonCard } from "@/components/PersonCard";
 import { StartupBoard } from "@/components/StartupBoard";
+import { HowToPlayDialog } from "@/components/HowToPlayDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { sourceGroups, sourceGroupsById } from "@/data/groups";
 import { peopleById } from "@/data/people";
 import { trackGameEvent } from "@/lib/analytics";
+import { getCompatibleRoles } from "@/lib/game";
 import { useGameStore } from "@/store/game-store";
 import { AnimatePresence, motion } from "framer-motion";
-import { HelpCircle, RotateCw, Sparkles } from "lucide-react";
+import { RotateCw, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -66,6 +68,10 @@ export default function PlayPage() {
   const selectedPerson = selectedPersonId
     ? peopleById.get(selectedPersonId)
     : undefined;
+  const playableChoices = choices.filter(
+    (person) => getCompatibleRoles(person, currentGame.team).length > 0,
+  );
+  const hasPlayableChoices = playableChoices.length > 0;
 
   function place(role: Parameters<typeof placeSelected>[0]) {
     const result = placeSelected(role);
@@ -124,8 +130,8 @@ export default function PlayPage() {
   }
 
   return (
-    <main className="page-shell relative min-h-screen px-5 py-6 sm:px-8 sm:py-8">
-      <header className="mx-auto grid max-w-7xl gap-4 pb-6 lg:grid-cols-[1fr_auto_1fr] lg:items-start">
+    <main className="app-page relative">
+      <header className="app-container grid gap-4 pb-6 lg:grid-cols-[1fr_auto_1fr] lg:items-start">
         <div>
           <Link
             href="/"
@@ -134,7 +140,7 @@ export default function PlayPage() {
             Till Series B
           </Link>
           <p className="mt-1 text-sm text-[var(--muted)]">
-            Build a five-role startup team.
+            Build a four-role startup team.
           </p>
         </div>
         <div className="min-w-[240px]">
@@ -146,22 +152,13 @@ export default function PlayPage() {
           </div>
         </div>
         <div className="flex justify-start gap-2 lg:justify-end">
-          {[HelpCircle].map((Icon, index) => (
-            <button
-              key={index}
-              type="button"
-              aria-label="Game control"
-              className="grid h-10 w-10 place-items-center rounded-[var(--radius)] border border-[var(--line)] bg-[var(--surface)] text-[var(--muted)]"
-            >
-              <Icon className="h-5 w-5" />
-            </button>
-          ))}
+          <HowToPlayDialog />
         </div>
       </header>
 
-      <div className="mx-auto grid w-full max-w-7xl gap-4">
+      <div className="app-container grid gap-4">
         <section className="game-grid items-start">
-          <div className="self-start rounded-[var(--radius)] border border-[var(--line)] bg-[color-mix(in_oklch,var(--panel),transparent_4%)] p-4 sm:p-5">
+          <div className="self-start rounded-[var(--radius)] border border-[color-mix(in_oklch,var(--pink),transparent_62%)] bg-[var(--panel)] p-4 sm:p-5">
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--line)] pb-3">
               <div className="flex flex-wrap items-center gap-3">
                 <Badge tone="muted" className="gap-2">
@@ -181,7 +178,7 @@ export default function PlayPage() {
                   <RotateCw className="h-4 w-4" />
                   Forced pick
                 </div>
-                {choices.length === 0 ? (
+                {showChoices && !hasPlayableChoices ? (
                   <Button
                     variant="secondary"
                     onClick={() => {
@@ -207,7 +204,7 @@ export default function PlayPage() {
                   : "Spin the category"}
               </h2>
               <p className="mt-3 max-w-2xl text-base leading-7 text-[var(--muted)]">
-                {choices.length === 0
+                {showChoices && !hasPlayableChoices
                   ? "This group cannot fill any remaining open role. Spin for another group."
                   : showChoices
                     ? (group?.description ??
@@ -290,12 +287,16 @@ export default function PlayPage() {
                       <PersonCard
                         person={person}
                         selected={selectedPersonId === person.id}
+                        disabled={
+                          getCompatibleRoles(person, currentGame.team).length ===
+                          0
+                        }
                         onSelect={selectPerson}
                       />
                     </motion.div>
                   ))}
                 </AnimatePresence>
-                {choices.length === 0 ? (
+                {!hasPlayableChoices ? (
                   <div className="rounded-[var(--radius)] border border-dashed border-[var(--line)] bg-[var(--surface)] p-4 text-center xl:col-span-2">
                     <p className="text-lg font-semibold">
                       No matching roles in this group.

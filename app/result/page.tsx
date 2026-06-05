@@ -1,23 +1,35 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
-import { ArrowLeft, Copy, Download, Link2, MessageCircle, RotateCcw, Share2 } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { ResultCard } from "@/components/ResultCard";
 import { ShareButton } from "@/components/ShareButton";
-import { scoreGame } from "@/lib/scoring";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { trackGameEvent } from "@/lib/analytics";
+import { scoreGame } from "@/lib/scoring";
 import { useGameStore } from "@/store/game-store";
+import {
+  ArrowLeft,
+  Copy,
+  Download,
+  Link2,
+  MessageCircle,
+  RotateCcw,
+  Share2,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useRef } from "react";
 
 export default function ResultPage() {
   const router = useRouter();
   const cardRef = useRef<HTMLDivElement | null>(null);
   const game = useGameStore((state) => state.game);
-  const startGame = useGameStore((state) => state.startGame);
   const reset = useGameStore((state) => state.reset);
-  const result = useMemo(() => (game && game.picks.length >= game.maxRounds ? scoreGame(game) : undefined), [game]);
+  const result = useMemo(
+    () =>
+      game && game.picks.length >= game.maxRounds ? scoreGame(game) : undefined,
+    [game],
+  );
+  const companyName = game?.companyName?.trim() || "Pied Piper";
 
   useEffect(() => {
     if (!game) {
@@ -40,12 +52,10 @@ export default function ResultPage() {
     }
   }, [result]);
 
-  function playAgain() {
+  function restart() {
     reset();
-    startGame();
     trackGameEvent("replay_clicked");
-    trackGameEvent("game_started", { replay: true });
-    router.push("/play");
+    router.push("/");
   }
 
   if (!result) {
@@ -57,23 +67,29 @@ export default function ResultPage() {
   }
 
   return (
-    <main className="page-shell relative min-h-screen px-5 py-6 sm:px-8 sm:py-8">
-      <div className="mx-auto grid max-w-6xl gap-4">
+    <main className="app-page relative">
+      <div className="app-container grid max-w-6xl gap-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <Button variant="secondary" onClick={playAgain}>
+          <Button variant="secondary" onClick={restart}>
             <ArrowLeft className="h-4 w-4" />
             New Game
           </Button>
-          <ShareButton target={cardRef} result={result} />
+          <ShareButton
+            target={cardRef}
+            result={result}
+            companyName={companyName}
+          />
         </div>
 
-        <ResultCard ref={cardRef} result={result} />
+        <ResultCard ref={cardRef} result={result} companyName={companyName} />
 
         <div className="rounded-[var(--radius)] border border-[var(--line)] bg-[var(--panel)] p-4">
           <div className="grid gap-4 lg:grid-cols-[1fr_2fr] lg:items-center">
             <div>
               <h2 className="text-lg font-semibold">Share your result</h2>
-              <p className="mt-1 text-sm text-[var(--muted)]">Brag. Roast. Start arguments.</p>
+              <p className="mt-1 text-sm text-[var(--muted)]">
+                Brag. Roast. Start arguments.
+              </p>
             </div>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
               {[
@@ -83,7 +99,15 @@ export default function ResultPage() {
                 [Share2, "Reddit"],
                 [Download, "Download"],
               ].map(([Icon, label]) => (
-                <Button key={label as string} variant="secondary" onClick={() => document.querySelector<HTMLButtonElement>("[data-share-trigger]")?.click()}>
+                <Button
+                  key={label as string}
+                  variant="secondary"
+                  onClick={() =>
+                    document
+                      .querySelector<HTMLButtonElement>("[data-share-trigger]")
+                      ?.click()
+                  }
+                >
                   <Icon className="h-4 w-4" />
                   {label as string}
                 </Button>
@@ -94,8 +118,10 @@ export default function ResultPage() {
 
         <div className="rounded-[var(--radius)] border border-[var(--line)] bg-[var(--panel)] p-4">
           <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-center">
-            <p className="text-center font-semibold sm:text-left">Think you can build a better team?</p>
-            <Button onClick={playAgain} className="w-full sm:w-72">
+            <p className="text-center font-semibold sm:text-left">
+              Think you can build a better team?
+            </p>
+            <Button onClick={restart} className="w-full sm:w-72">
               <RotateCcw className="h-4 w-4" />
               Play Again
             </Button>

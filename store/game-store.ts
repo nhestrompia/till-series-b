@@ -1,8 +1,10 @@
 "use client";
 
 import type { GameState, Person, Role } from "@/data/types";
+import { peopleById } from "@/data/people";
 import {
   createGame,
+  getCompatibleRoles,
   getRoundChoices,
   placePerson,
   spinGroup,
@@ -18,10 +20,11 @@ type LastAssignment = {
 
 type GameStore = {
   game?: GameState;
+  lastCompanyName?: string;
   choices: Person[];
   selectedPersonId?: string;
   lastAssignment?: LastAssignment;
-  startGame: () => GameState;
+  startGame: (companyName?: string) => GameState;
   selectPerson: (personId: string) => void;
   placeSelected: (role: Role) => {
     completed: boolean;
@@ -36,18 +39,32 @@ export const useGameStore = create<GameStore>()(
   persist(
     (set, get) => ({
       choices: [],
-      startGame: () => {
-        const game = createGame();
+      startGame: (companyName) => {
+        const game = createGame(companyName);
         const choices = getRoundChoices(game);
         set({
           game,
+          lastCompanyName: game.companyName,
           choices,
           selectedPersonId: undefined,
           lastAssignment: undefined,
         });
         return game;
       },
-      selectPerson: (personId: string) => set({ selectedPersonId: personId }),
+      selectPerson: (personId: string) => {
+        const currentGame = get().game;
+        const person = peopleById.get(personId);
+
+        if (
+          !currentGame ||
+          !person ||
+          getCompatibleRoles(person, currentGame.team).length === 0
+        ) {
+          return;
+        }
+
+        set({ selectedPersonId: personId });
+      },
       placeSelected: (role: Role) => {
         const currentGame = get().game;
         const selectedPersonId = get().selectedPersonId;
@@ -104,9 +121,10 @@ export const useGameStore = create<GameStore>()(
         }),
     }),
     {
-      name: "till-series-b",
+      name: "till-series-b-v2",
       partialize: (state) => ({
         game: state.game,
+        lastCompanyName: state.lastCompanyName,
         choices: state.choices,
         selectedPersonId: state.selectedPersonId,
         lastAssignment: state.lastAssignment,

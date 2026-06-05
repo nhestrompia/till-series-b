@@ -1,12 +1,18 @@
 import { describe, expect, it } from "vitest";
 import type { GameState, Role } from "@/data/types";
+import {
+  getResultInsights,
+  RESULT_INSIGHT_VARIANT_COUNTS,
+} from "@/lib/result-insights";
+import { resultHeadline, shareText } from "@/lib/result-copy";
 import { outcomeForScore, scoreGame } from "@/lib/scoring";
 
 function stateWithTeam(team: Record<Role, string>): GameState {
   return {
     id: "test-game",
-    round: 12,
-    maxRounds: 12,
+    companyName: "Orbit Labs",
+    round: 4,
+    maxRounds: 4,
     currentGroupId: "tech-twitter",
     team,
     usedGroupIds: ["tech-twitter"],
@@ -36,14 +42,12 @@ describe("scoring", () => {
       cto: "andrej-karpathy",
       product: "dylan-field",
       growth: "alex-hormozi",
-      operator: "sheryl-sandberg",
     }));
     const oneDimensional = scoreGame(stateWithTeam({
       ceo: "sam-altman",
       cto: "ilya-sutskever",
       product: "vitalik-buterin",
       growth: "john-carmack",
-      operator: "george-hotz",
     }));
 
     expect(balanced.score).toBeGreaterThan(oneDimensional.score);
@@ -55,14 +59,12 @@ describe("scoring", () => {
       cto: "evan-you",
       product: "melanie-perkins",
       growth: "lenny-rachitsky",
-      operator: "tim-cook",
     }));
     const chaos = scoreGame(stateWithTeam({
       ceo: "elon-musk",
       cto: "george-hotz",
       product: "steve-jobs",
       growth: "chamath-palihapitiya",
-      operator: "cz",
     }));
 
     expect(chaos.breakdown.penalty).toBeGreaterThan(calm.breakdown.penalty);
@@ -74,7 +76,6 @@ describe("scoring", () => {
       cto: "andrej-karpathy",
       product: "mira-murati",
       growth: "lee-robinson",
-      operator: "greg-brockman",
     }));
 
     expect(result.breakdown.fameMultiplier).toBeGreaterThan(1);
@@ -84,7 +85,21 @@ describe("scoring", () => {
       cto: "andrej-karpathy",
       product: "mira-murati",
       growth: "lee-robinson",
-      operator: "greg-brockman",
     })).score).toBe(result.score);
+  });
+
+  it("provides broad, deterministic result insight copy", () => {
+    const result = scoreGame(stateWithTeam({
+      ceo: "patrick-collison",
+      cto: "andrej-karpathy",
+      product: "dylan-field",
+      growth: "alex-hormozi",
+    }));
+
+    expect(RESULT_INSIGHT_VARIANT_COUNTS.strength).toBeGreaterThanOrEqual(20);
+    expect(RESULT_INSIGHT_VARIANT_COUNTS.weakness).toBeGreaterThanOrEqual(20);
+    expect(getResultInsights(result)).toEqual(getResultInsights(result));
+    expect(resultHeadline(result, "Orbit Labs")).toContain("Orbit Labs");
+    expect(shareText(result, "Orbit Labs")).toContain("Orbit Labs");
   });
 });

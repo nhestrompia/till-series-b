@@ -4,7 +4,7 @@ import { peopleById } from "@/data/people";
 import type { GameState, Person, Role } from "@/data/types";
 import { getCompatibleRoles, roleShortLabels, roles } from "@/lib/game";
 import { cn } from "@/lib/utils";
-import { Briefcase, Code2, Crown, Cuboid, TrendingUp } from "lucide-react";
+import { Code2, Crown, Cuboid, TrendingUp } from "lucide-react";
 
 type StartupBoardProps = {
   game: GameState;
@@ -16,8 +16,7 @@ const positions: Record<Role, string> = {
   ceo: "left-1/2 top-[10%] -translate-x-1/2",
   cto: "left-[18%] top-[38%]",
   product: "right-[18%] top-[38%]",
-  growth: "left-[27%] bottom-[12%]",
-  operator: "right-[27%] bottom-[12%]",
+  growth: "left-1/2 bottom-[12%] -translate-x-1/2",
 };
 
 const roleTone: Record<Role, { text: string; border: string; bg: string; icon: typeof Crown }> = {
@@ -45,19 +44,13 @@ const roleTone: Record<Role, { text: string; border: string; bg: string; icon: t
     bg: "bg-[color-mix(in_oklch,var(--gold),transparent_88%)]",
     icon: TrendingUp,
   },
-  operator: {
-    text: "text-[var(--cyan)]",
-    border: "border-[var(--cyan)]",
-    bg: "bg-[color-mix(in_oklch,var(--cyan),transparent_90%)]",
-    icon: Briefcase,
-  },
 };
 
 export function StartupBoard({ game, selectedPerson, onPlace }: StartupBoardProps) {
   const compatibleRoles = selectedPerson ? getCompatibleRoles(selectedPerson, game.team) : [];
 
   return (
-    <section className="relative self-start overflow-hidden rounded-[var(--radius)] border border-[var(--line)] bg-[color-mix(in_oklch,var(--panel-cool),transparent_4%)] p-4 sm:p-5">
+    <section className="relative self-start overflow-hidden rounded-[var(--radius)] border border-[color-mix(in_oklch,var(--cyan),transparent_66%)] bg-[var(--panel-cool)] p-4 sm:p-5">
       <div className="mb-4 flex items-center justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold">Startup formation</h2>
@@ -65,7 +58,7 @@ export function StartupBoard({ game, selectedPerson, onPlace }: StartupBoardProp
             {selectedPerson ? `Place ${selectedPerson.name} into a matching open role.` : "Select a person, then choose a matching role."}
           </p>
         </div>
-        <Badge tone="gold">{Object.keys(game.team).length}/5 roles</Badge>
+        <Badge tone="gold">{Object.keys(game.team).length}/4 roles</Badge>
       </div>
 
       <div className="grid gap-3">
@@ -138,7 +131,7 @@ export function LegacyStartupBoard({ game }: StartupBoardProps) {
       <div className="absolute right-8 top-0 h-full w-px bg-[color-mix(in_oklch,var(--muted),transparent_60%)]" />
       <div className="absolute inset-x-6 top-6 flex items-center justify-between">
         <Badge tone="muted">Startup formation</Badge>
-        <Badge tone="gold">{Object.keys(game.team).length}/5 roles</Badge>
+        <Badge tone="gold">{Object.keys(game.team).length}/4 roles</Badge>
       </div>
 
       {roles.map((role) => {

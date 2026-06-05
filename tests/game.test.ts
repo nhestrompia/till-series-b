@@ -1,35 +1,67 @@
-import { describe, expect, it } from "vitest";
 import { peopleById } from "@/data/people";
-import { assignPersonToTeam, createGame, getCompatibleRoles, getCurrentGroup, getRoundChoices, placePerson } from "@/lib/game";
-import type { Role } from "@/data/types";
+import type { GameState } from "@/data/types";
+import {
+  assignPersonToTeam,
+  createGame,
+  getCompatibleRoles,
+  getCurrentGroup,
+  getRoundChoices,
+  placePerson,
+} from "@/lib/game";
+import { describe, expect, it } from "vitest";
 
 describe("game engine", () => {
-  it("starts a 5-round game with a valid first group", () => {
-    const game = createGame();
+  it("starts a 4-round game with a valid first group", () => {
+    const game = createGame("Orbit Labs");
 
-    expect(game.maxRounds).toBe(5);
+    expect(game.companyName).toBe("Orbit Labs");
+    expect(game.maxRounds).toBe(4);
     expect(game.round).toBe(1);
     expect(game.currentGroupId).toBeTruthy();
     expect(game.usedGroupIds).toHaveLength(1);
   });
 
-  it("lists every compatible person for the current round", () => {
+  it("normalizes an empty company name", () => {
+    expect(createGame("   ").companyName).toBe("Pied Piper");
+  });
+
+  it("lists every unpicked person for the current round", () => {
     const game = createGame();
     const choices = getRoundChoices(game);
     const group = getCurrentGroup(game);
     const expected = group.peopleIds
       .map((id) => peopleById.get(id))
-      .filter((person) => person && getCompatibleRoles(person, game.team).length > 0);
+      .filter(Boolean);
 
-    expect(new Set(choices.map((person) => person.id))).toEqual(new Set(expected.map((person) => person!.id)));
+    expect(new Set(choices.map((person) => person.id))).toEqual(
+      new Set(expected.map((person) => person!.id)),
+    );
+  });
+
+  it("keeps incompatible people visible so the UI can disable them", () => {
+    const game: GameState = {
+      ...createGame(),
+      currentGroupId: "openai",
+      team: {
+        cto: "ilya-sutskever",
+        product: "mira-murati",
+      },
+    };
+    const choices = getRoundChoices(game);
+    const andrej = choices.find((person) => person.id === "andrej-karpathy");
+
+    expect(andrej).toBeTruthy();
+    expect(getCompatibleRoles(andrej!, game.team)).toHaveLength(0);
   });
 
   it("does not repeat groups before exhaustion during a normal game", () => {
     let game = createGame();
 
     for (let index = 0; index < game.maxRounds - 1; index += 1) {
-      const choice = getRoundChoices(game)[0];
-      const role = getCompatibleRoles(choice, game.team)[0];
+      const choice = getRoundChoices(game).find(
+        (person) => getCompatibleRoles(person, game.team).length > 0,
+      )!;
+      const role = getCompatibleRoles(choice, game.team)[0]!;
       game = placePerson(game, choice.id, role).state;
     }
 
@@ -47,20 +79,18 @@ describe("game engine", () => {
   it("rejects incompatible role placement", () => {
     const person = peopleById.get("andrej-karpathy")!;
 
-    expect(() => assignPersonToTeam({}, person, "growth")).toThrow("cannot fill");
+    expect(() => assignPersonToTeam({}, person, "growth")).toThrow(
+      "cannot fill",
+    );
   });
 
-  it("places the selected person into the requested compatible open role", () => {
-    const fullTeam: Record<Role, string> = {
-      ceo: "marc-lou",
+  it("places the selected person into an open secondary role", () => {
+    const team = {
       cto: "swizec-teller",
-      product: "arvid-kahl",
-      growth: "courtland-allen",
-      operator: "",
     };
-    const person = peopleById.get("harley-finkelstein")!;
-    const assignment = assignPersonToTeam({ ...fullTeam, operator: undefined }, person, "operator");
+    const person = peopleById.get("andrej-karpathy")!;
+    const assignment = assignPersonToTeam(team, person, "product");
 
-    expect(assignment.team.operator).toBe(person.id);
+    expect(assignment.team.product).toBe(person.id);
   });
 });

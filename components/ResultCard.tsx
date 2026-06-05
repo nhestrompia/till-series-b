@@ -3,6 +3,7 @@
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { roleShortLabels } from "@/lib/game";
+import { getResultInsights } from "@/lib/result-insights";
 import { resultHeadline } from "@/lib/result-copy";
 import type { StartupResult } from "@/lib/scoring";
 import { AlertTriangle, Star } from "lucide-react";
@@ -10,6 +11,7 @@ import * as React from "react";
 
 type ResultCardProps = {
   result: StartupResult;
+  companyName: string;
 };
 
 function average(values: number[]) {
@@ -38,11 +40,12 @@ const metricToneClass = {
 };
 
 export const ResultCard = React.forwardRef<HTMLDivElement, ResultCardProps>(
-  ({ result }, ref) => {
+  ({ result, companyName }, ref) => {
     const team = teamPeople(result);
     const market = average(team.map((person) => (person!.stats.growth + person!.stats.fundraising + person!.stats.fame) / 3));
     const execution = average(team.map((person) => (person!.stats.operations + person!.stats.product + person!.stats.engineering) / 3));
     const chaos = average(team.map((person) => person!.stats.chaos));
+    const insights = getResultInsights(result);
     const metrics = [
       ["Team Rating", teamRating(result.score), "pink"],
       ["Market Potential", market, "acid"],
@@ -58,10 +61,10 @@ export const ResultCard = React.forwardRef<HTMLDivElement, ResultCardProps>(
       >
         <div className="py-4 text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--pink)]">
-            Your startup is ready
+            {companyName}
           </p>
-          <h1 className="mx-auto mt-3 max-w-3xl text-3xl font-semibold leading-tight sm:text-4xl">
-            {resultHeadline(result)}
+          <h1 className="mx-auto mt-3 max-w-3xl text-balance text-3xl font-semibold leading-tight sm:text-4xl">
+            {resultHeadline(result, companyName)}
           </h1>
         </div>
 
@@ -75,13 +78,22 @@ export const ResultCard = React.forwardRef<HTMLDivElement, ResultCardProps>(
         </div>
 
         <h2 className="mt-5 text-lg font-semibold">Your Team</h2>
-        <div className="mt-3 grid gap-3 sm:grid-cols-5">
+        <div className="mt-3 grid gap-3 sm:grid-cols-4">
           {result.team.map(({ role, person }) => (
             <div
               key={role}
               className="rounded-[var(--radius)] border border-[var(--line)] bg-[var(--bg)] p-3 text-center"
             >
-              <Badge tone={role === "growth" ? "gold" : role === "operator" ? "cyan" : role === "product" ? "acid" : "pink"} className="mx-auto">
+              <Badge
+                tone={
+                  role === "growth"
+                    ? "gold"
+                    : role === "product"
+                      ? "acid"
+                      : "pink"
+                }
+                className="mx-auto"
+              >
                 {roleShortLabels[role]}
               </Badge>
               {person ? (
@@ -104,10 +116,10 @@ export const ResultCard = React.forwardRef<HTMLDivElement, ResultCardProps>(
               Biggest Strength
             </div>
             <p className="mt-3 text-2xl font-semibold text-[var(--acid)]">
-              {result.strengths[0] ?? "Distribution"}
+              {insights.strength.title}
             </p>
-            <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
-              {result.bestPick.name} gave this team enough momentum to make the market look obvious.
+            <p className="mt-2 text-pretty text-sm leading-6 text-[var(--muted)]">
+              {insights.strength.detail}
             </p>
           </div>
           <div className="min-h-36 overflow-hidden rounded-[var(--radius)] border border-[color-mix(in_oklch,var(--gold),transparent_50%)] bg-[color-mix(in_oklch,var(--gold),transparent_94%)] p-4">
@@ -116,9 +128,11 @@ export const ResultCard = React.forwardRef<HTMLDivElement, ResultCardProps>(
               Biggest Weakness
             </div>
             <p className="mt-3 text-2xl font-semibold text-[var(--gold)]">
-              {chaos > 65 ? "Deadlines are optional" : "Narrative risk"}
+              {insights.weakness.title}
             </p>
-            <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{result.weakness}</p>
+            <p className="mt-2 text-pretty text-sm leading-6 text-[var(--muted)]">
+              {insights.weakness.detail}
+            </p>
           </div>
         </div>
 
