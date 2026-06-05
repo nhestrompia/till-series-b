@@ -1,18 +1,20 @@
 @import "tailwindcss";
 
 :root {
-  --bg: oklch(0.16 0.014 252);
-  --bg-strong: oklch(0.115 0.015 252);
-  --surface: oklch(0.2 0.016 252);
-  --surface-lift: oklch(0.245 0.018 252);
-  --line: oklch(0.34 0.02 252);
-  --text: oklch(0.92 0.01 252);
-  --muted: oklch(0.68 0.018 252);
-  --acid: oklch(0.64 0.12 285);
-  --gold: oklch(0.73 0.11 78);
-  --pink: oklch(0.66 0.12 292);
-  --cyan: oklch(0.67 0.085 225);
-  --danger: oklch(0.64 0.13 25);
+  --bg: oklch(0.145 0.026 330);
+  --bg-strong: oklch(0.1 0.018 265);
+  --surface: oklch(0.19 0.026 250);
+  --surface-lift: oklch(0.235 0.03 250);
+  --panel: oklch(0.18 0.036 350);
+  --panel-cool: oklch(0.18 0.03 225);
+  --line: oklch(0.36 0.032 240);
+  --text: oklch(0.93 0.012 245);
+  --muted: oklch(0.7 0.026 245);
+  --acid: oklch(0.76 0.145 46);
+  --gold: oklch(0.78 0.13 78);
+  --pink: oklch(0.72 0.145 315);
+  --cyan: oklch(0.72 0.12 202);
+  --danger: oklch(0.66 0.15 25);
   --radius: 8px;
 }
 
@@ -28,7 +30,9 @@ html {
 body {
   min-height: 100vh;
   margin: 0;
-  background: var(--bg-strong);
+  background:
+    linear-gradient(135deg, color-mix(in oklch, var(--bg), transparent 45%), transparent 42%),
+    var(--bg-strong);
   color: var(--text);
   font-family: "Avenir Next", "Trebuchet MS", Verdana, sans-serif;
   letter-spacing: 0;
@@ -59,7 +63,7 @@ a {
 }
 
 .result-card {
-  background: var(--surface);
+  background: var(--panel-cool);
 }
 
 .top-bar {

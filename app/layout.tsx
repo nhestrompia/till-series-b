@@ -15,7 +15,7 @@ export default function RootLayout({
       <body>
         <div className="noise" />
         {children}
-        {process.env.VERCEL ? <Analytics /> : null}
+        <Analytics />
       </body>
     </html>
   );

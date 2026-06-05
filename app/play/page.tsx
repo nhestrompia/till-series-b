@@ -10,7 +10,7 @@ import { peopleById } from "@/data/people";
 import { trackGameEvent } from "@/lib/analytics";
 import { useGameStore } from "@/store/game-store";
 import { AnimatePresence, motion } from "framer-motion";
-import { HelpCircle, Menu, RotateCw, Sparkles } from "lucide-react";
+import { HelpCircle, RotateCw, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -124,12 +124,12 @@ export default function PlayPage() {
   }
 
   return (
-    <main className="page-shell relative min-h-screen px-4 py-5 sm:px-6 sm:py-6 lg:py-7">
-      <header className="mx-auto grid max-w-7xl gap-3 pb-5 lg:grid-cols-[1fr_auto_1fr] lg:items-start">
+    <main className="page-shell relative min-h-screen px-5 py-6 sm:px-8 sm:py-8">
+      <header className="mx-auto grid max-w-7xl gap-4 pb-6 lg:grid-cols-[1fr_auto_1fr] lg:items-start">
         <div>
           <Link
             href="/"
-            className="inline-flex rounded-[var(--radius)] text-2xl font-semibold transition hover:text-[var(--pink)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--acid)]"
+            className="inline-flex rounded-[var(--radius)] text-3xl font-semibold leading-tight transition hover:text-[var(--gold)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--acid)]"
           >
             Till Series B
           </Link>
@@ -146,7 +146,7 @@ export default function PlayPage() {
           </div>
         </div>
         <div className="flex justify-start gap-2 lg:justify-end">
-          {[HelpCircle, Menu].map((Icon, index) => (
+          {[HelpCircle].map((Icon, index) => (
             <button
               key={index}
               type="button"
@@ -160,15 +160,13 @@ export default function PlayPage() {
       </header>
 
       <div className="mx-auto grid w-full max-w-7xl gap-4">
-        <section className="game-grid">
-          <div className="rounded-[var(--radius)] border border-[var(--line)] bg-[color-mix(in_oklch,var(--surface),transparent_6%)] p-4">
+        <section className="game-grid items-start">
+          <div className="self-start rounded-[var(--radius)] border border-[var(--line)] bg-[color-mix(in_oklch,var(--panel),transparent_4%)] p-4 sm:p-5">
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--line)] pb-3">
               <div className="flex flex-wrap items-center gap-3">
-                <Badge tone="pink" className="gap-2">
+                <Badge tone="muted" className="gap-2">
                   <Sparkles className="h-4 w-4" />
-                  {showChoices
-                    ? (group?.name ?? "Tech Twitter").toUpperCase()
-                    : "READY TO SPIN"}
+                  {showChoices ? "CURRENT GROUP" : "READY TO SPIN"}
                 </Badge>
                 <span className="hidden h-5 w-px bg-[var(--line)] sm:block" />
                 <button
@@ -199,9 +197,16 @@ export default function PlayPage() {
               </div>
             </div>
 
-            <div className="mt-4">
-              <h2 className="text-2xl font-semibold leading-tight">Pick one</h2>
-              <p className="mt-1 max-w-xl text-sm leading-6 text-[var(--muted)]">
+            <div className="mt-5">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--gold)]">
+                Pick one from
+              </p>
+              <h2 className="mt-1 text-4xl font-semibold leading-tight text-[var(--text)] sm:text-5xl">
+                {showChoices
+                  ? (group?.name ?? "Tech Twitter")
+                  : "Spin the category"}
+              </h2>
+              <p className="mt-3 max-w-2xl text-base leading-7 text-[var(--muted)]">
                 {choices.length === 0
                   ? "This group cannot fill any remaining open role. Spin for another group."
                   : showChoices

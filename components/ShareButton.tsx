@@ -39,7 +39,7 @@ export function ShareButton({ target, result }: ShareButtonProps) {
     const dataUrl = await toPng(target.current, {
       cacheBust: true,
       pixelRatio: 2,
-      backgroundColor: "oklch(0.13 0.025 250)",
+      backgroundColor: "oklch(0.1 0.018 265)",
     });
     const link = document.createElement("a");
     link.href = dataUrl;
@@ -80,35 +80,35 @@ export function ShareButton({ target, result }: ShareButtonProps) {
       </Button>
 
       {open ? (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-[oklch(0.07_0.02_252_/_0.76)] p-4">
-          <div className="max-h-[92vh] w-full max-w-3xl overflow-auto rounded-[20px] border border-[var(--line)] bg-[var(--bg-strong)] p-5 shadow-2xl">
+        <div className="fixed inset-0 z-50 grid place-items-center bg-[oklch(0.07_0.02_265_/_0.78)] p-4">
+          <div className="max-h-[92vh] w-full max-w-3xl overflow-auto rounded-[var(--radius)] border border-[var(--line)] bg-[var(--bg-strong)] p-4 shadow-2xl sm:p-5">
             <div className="flex items-center justify-between gap-4">
-              <h2 className="text-3xl font-black">Share your company</h2>
+              <h2 className="text-2xl font-semibold">Share your company</h2>
               <button
                 type="button"
                 aria-label="Close share modal"
                 onClick={() => setOpen(false)}
-                className="grid h-11 w-11 place-items-center rounded-[var(--radius)] border border-[var(--line)] text-[var(--muted)]"
+                className="grid h-10 w-10 place-items-center rounded-[var(--radius)] border border-[var(--line)] text-[var(--muted)]"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
-            <div className="mt-5 rounded-[var(--radius)] border border-[var(--line)] bg-[var(--surface)] p-5">
+            <div className="mt-4 rounded-[var(--radius)] border border-[var(--line)] bg-[var(--panel-cool)] p-4">
               <div className="flex items-center justify-between border-b border-[var(--line)] pb-4">
                 <div>
-                  <p className="text-xs font-black uppercase tracking-[0.24em] text-[var(--muted)]">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
                     Outcome
                   </p>
-                  <p className="display-font mt-2 text-4xl">
+                  <p className="mt-2 text-3xl font-semibold">
                     {result.valuation}
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-xs font-black uppercase tracking-[0.24em] text-[var(--muted)]">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
                     Score
                   </p>
-                  <p className="mt-2 text-4xl font-black text-[var(--gold)]">
+                  <p className="mt-2 text-3xl font-semibold text-[var(--gold)]">
                     {result.score}
                   </p>
                 </div>
@@ -126,7 +126,7 @@ export function ShareButton({ target, result }: ShareButtonProps) {
                         className="h-10 w-10 rounded-xl"
                       />
                       <div className="min-w-0">
-                        <p className="truncate font-black">{person!.name}</p>
+                        <p className="truncate font-semibold">{person!.name}</p>
                         <p className="truncate text-sm text-[var(--muted)]">
                           {person!.knownFor}
                         </p>
@@ -135,12 +135,12 @@ export function ShareButton({ target, result }: ShareButtonProps) {
                     </div>
                   ))}
               </div>
-              <p className="mt-5 text-lg font-black">
+              <p className="mt-4 text-base font-semibold">
                 I built a {result.valuation} startup. Think you can beat it?
               </p>
             </div>
 
-            <div className="mt-4 rounded-[var(--radius)] border border-[var(--line)] bg-[var(--surface)] px-4 py-3 text-sm text-[var(--muted)]">
+            <div className="mt-4 rounded-[var(--radius)] border border-[var(--line)] bg-[var(--panel)] px-4 py-3 text-sm text-[var(--muted)]">
               {shareUrl}
             </div>
 

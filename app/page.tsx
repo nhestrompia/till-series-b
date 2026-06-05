@@ -49,9 +49,7 @@ export default function HomePage() {
       </div>
 
       <header className="relative z-10 mx-auto flex max-w-7xl items-center justify-between px-5 py-5 sm:px-8">
-        <div className="rounded-[var(--radius)] border border-[var(--line)] bg-[color-mix(in_oklch,var(--bg-strong),transparent_10%)] px-3 py-1.5 text-base font-semibold">
-          TILL <span className="text-[var(--pink)]">SERIES B</span>
-        </div>
+        <img src="/till.png" alt="Till Series B logo" className="h-24 w-auto" />
       </header>
 
       <section className="relative z-10 mx-auto grid min-h-[calc(100vh-82px)] w-full max-w-5xl place-items-center px-5 pb-8 text-center sm:px-8">

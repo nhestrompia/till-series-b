@@ -57,9 +57,9 @@ export default function ResultPage() {
   }
 
   return (
-    <main className="page-shell relative min-h-screen px-4 py-6 sm:px-6 lg:py-8">
-      <div className="mx-auto max-w-6xl rounded-[var(--radius)] border border-[var(--line)] bg-[color-mix(in_oklch,var(--surface),transparent_8%)] p-4 sm:p-5">
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+    <main className="page-shell relative min-h-screen px-5 py-6 sm:px-8 sm:py-8">
+      <div className="mx-auto grid max-w-6xl gap-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <Button variant="secondary" onClick={playAgain}>
             <ArrowLeft className="h-4 w-4" />
             New Game
@@ -69,7 +69,7 @@ export default function ResultPage() {
 
         <ResultCard ref={cardRef} result={result} />
 
-        <div className="mt-4 rounded-[var(--radius)] border border-[var(--line)] bg-[var(--bg)] p-4">
+        <div className="rounded-[var(--radius)] border border-[var(--line)] bg-[var(--panel)] p-4">
           <div className="grid gap-4 lg:grid-cols-[1fr_2fr] lg:items-center">
             <div>
               <h2 className="text-lg font-semibold">Share your result</h2>
@@ -92,7 +92,7 @@ export default function ResultPage() {
           </div>
         </div>
 
-        <div className="mt-4 rounded-[var(--radius)] border border-[var(--line)] bg-[var(--bg)] p-4">
+        <div className="rounded-[var(--radius)] border border-[var(--line)] bg-[var(--panel)] p-4">
           <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-center">
             <p className="text-center font-semibold sm:text-left">Think you can build a better team?</p>
             <Button onClick={playAgain} className="w-full sm:w-72">

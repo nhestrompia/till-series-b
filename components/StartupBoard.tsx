@@ -57,7 +57,7 @@ export function StartupBoard({ game, selectedPerson, onPlace }: StartupBoardProp
   const compatibleRoles = selectedPerson ? getCompatibleRoles(selectedPerson, game.team) : [];
 
   return (
-    <section className="relative overflow-hidden rounded-[var(--radius)] border border-[var(--line)] bg-[color-mix(in_oklch,var(--surface),transparent_6%)] p-4">
+    <section className="relative self-start overflow-hidden rounded-[var(--radius)] border border-[var(--line)] bg-[color-mix(in_oklch,var(--panel-cool),transparent_4%)] p-4 sm:p-5">
       <div className="mb-4 flex items-center justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold">Startup formation</h2>
